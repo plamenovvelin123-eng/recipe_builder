@@ -1,0 +1,262 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register</title>
+
+    <style>
+        body {
+            background: #E8FBF7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            width: 330px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #aaa;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 12px;
+            background: #4ECDAF;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #3DBB9D;
+        }
+
+        .switch {
+            margin-top: 10px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .switch:hover {
+            text-decoration: underline;
+        }
+        .input-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Tooltip container */
+.tooltip {
+    position: absolute;
+    top: 48px;
+    left: 0;
+    width: 250px;
+
+    background: #ffffff;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #4ECDAF;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+
+    font-size: 14px;
+    text-align: left;
+    color: #333;
+
+    opacity: 0;
+    transform: translateY(-5px);
+    pointer-events: none;
+
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 20;
+}
+
+/* Show on hover */
+.input-wrapper:hover .tooltip {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.no-recipes {
+    text-align: center;
+    margin-top: 80px;
+    color: #4c4237;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.no-recipes .big {
+    font-size: 26px;
+    font-weight: bold;
+    color: #3d342b;
+}
+
+.no-recipes .small {
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+.no-recipes button {
+    margin-top: 12px;
+    padding: 12px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    background: #f8f1e7;
+    border: 2px solid #b8a99b;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.no-recipes button:hover {
+    background: #f0e6d7;
+    transform: scale(1.05);
+}
+
+
+
+
+
+
+    </style>
+</head>
+
+<body>
+    
+    
+
+<div class="box" id="loginBox">
+    <h2>Login</h2>
+    <input type="text" id="loginUser" placeholder="Username">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="login()">Sign In</button>
+
+    <div class="switch" onclick="showRegister()">Don’t have an account? Register</div>
+</div>
+
+<div class="box" id="registerBox" style="display:none;">
+    <h2>Register</h2>
+
+    <!-- USERNAME -->
+    <div class="input-wrapper">
+        <input type="text" id="regUser" placeholder="Username">
+        <div class="tooltip">
+            <b>Username requirements:</b><br>
+            • At least 4 characters<br>
+            • No spaces<br>
+            • Must be unique
+        </div>
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="input-wrapper">
+        <input type="password" id="regPass" placeholder="Password">
+        <div class="tooltip">
+            <b>Password requirements:</b><br>
+            • At least 6 characters<br>
+            • Must contain 1 uppercase letter<br>
+            • Must contain 1 number
+        </div>
+    </div>
+
+    <button onclick="register()">Create Account</button>
+
+    <div class="switch" onclick="showLogin()">Already have an account? Login</div>
+</div>
+
+
+
+
+<script>
+    if (recipes.length === 0) {
+    document.getElementById("tilesContainer").innerHTML = `
+        <div class="no-recipes">
+            <p class="big">You’ve got no recipes yet.</p>
+            <p class="small">Let's add your first one!</p>
+            <button onclick="openAddRecipe()">+ Add Recipe</button>
+        </div>
+    `;
+}
+
+    function showRegister() {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("registerBox").style.display = "block";
+    }
+
+    function showLogin() {
+        document.getElementById("registerBox").style.display = "none";
+        document.getElementById("loginBox").style.display = "block";
+    }
+
+    async function login() {
+        const username = document.getElementById("loginUser").value;
+        const password = document.getElementById("loginPass").value;
+
+        const response = await fetch("/users/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+        alert(result.message);
+
+        if (response.ok) {
+            window.location.href = "/recipes/myrecipes";
+        }
+    }
+
+    async function register() {
+        const username = document.getElementById("regUser").value;
+        const password = document.getElementById("regPass").value;
+
+        const response = await fetch("/users/register", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+        alert(result.message || "Registered!");
+
+        if (response.ok) {
+            showLogin();
+        }
+    }
+</script>
+
+</body>
+</html> -->

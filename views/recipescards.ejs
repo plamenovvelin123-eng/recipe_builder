@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My cards</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .card-big {
+      width: 90%;
+      max-width: 450px;
+      background: white;
+      border-radius: 25px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      animation: fade 0.4s ease;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: scale(0.95); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .card-big img {
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      margin-top: 15px;
+    }
+
+    .buttons {
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 10px 15px;
+      background: #eee;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: #ddd;
+      transform: translateY(-2px);
+    }
+
+    /* Arrows */
+    .arrow {
+      font-size: 40px;
+      position: absolute;
+      top: 50%;
+      cursor: pointer;
+      user-select: none;
+      color: #444;
+      opacity: 0.7;
+      transition: 0.2s;
+    }
+
+    .arrow:hover { opacity: 1; }
+
+    #left { left: 15px; }
+    #right { right: 15px; }
+
+    /* Modal styles reused */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.3s ease;
+    }
+
+    .modal.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      width: 85%;
+      max-width: 350px;
+      background: white;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      animation: slide-up 0.3s ease;
+    }
+
+    @keyframes slide-up {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .close-btn {
+      margin-top: 15px;
+      padding: 8px 15px;
+      background: #eee;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="left" class="arrow">⬅️</div>
+  <div id="right" class="arrow">➡️</div>
+
+  <div id="fullscreen-card" class="card-big"></div>
+
+  <!-- MODAL -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2 id="modal-title"></h2>
+      <ul id="modal-list"></ul>
+      <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const recipes = <%- JSON.stringify(recipes) %>;
+    let index = 0;
+
+    const card = document.getElementById("fullscreen-card");
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modal-title");
+    const modalList = document.getElementById("modal-list");
+
+    function render() {
+      const r = recipes[index];
+
+      card.innerHTML = `
+    <img src="${r.img ? r.img : '/images/default.jpg'}" alt="Recipe Image">
+
+    <h1>${r.Dish}</h1>
+
+<div class="buttons">
+  <button class="btn" onclick="openModal('Ingredients')">Ingredients</button>
+  <button class="btn" onclick="openModal('Instructions')">Instructions</button>
+</div>
+
+<p id="ingredients" hidden>${r.Ingredients.join(",")}</p>
+<p id="instructions" hidden>${r.Instructions.join(",")}</p>
+`;
+
+    }
+
+    function openModal(type) {
+      modalTitle.textContent = type;
+
+      const raw = document.getElementById(type.toLowerCase()).textContent.split(",");
+      modalList.innerHTML = raw.map(i => `<li>${i}</li>`).join("");
+
+      modal.classList.add("show");
+    }
+
+    function closeModal() {
+      modal.classList.remove("show");
+    }
+
+    document.getElementById("right").onclick = () => {
+      index = (index + 1) % recipes.length;
+      render();
+    };
+
+    document.getElementById("left").onclick = () => {
+      index = (index - 1 + recipes.length) % recipes.length;
+      render();
+    };
+
+    modal.addEventListener("click", e => {
+      if (e.target === modal) closeModal();
+    });
+
+    render();
+  </script>
+
+</body>
+</html>

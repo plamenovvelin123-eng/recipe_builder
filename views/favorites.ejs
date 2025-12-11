@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Favourites</title>
+
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    background: url("/images/favorites.png") no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+}
+.sidebar {
+    width: 60px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 90px;
+    background: white;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    transition: width 0.3s ease;
+    overflow: hidden;
+    z-index: 50;
+}
+
+.sidebar:hover {
+    width: 200px;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 22px;
+    margin: 20px 10px;
+    font-size: 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-radius: 12px;
+    color: #2a4b6f;
+    transition: 0.25s ease;
+}
+
+.sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.55);
+    transform: translateX(5px);
+}
+
+.label {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: 0.3s ease;
+}
+
+.sidebar:hover .label {
+    opacity: 1;
+    transform: translateX(0);
+}
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+
+/* ========================= MAIN CONTENT SHIFT (за Hello, user) ========================= */
+.main-content {
+    margin-left: 60px;
+    transition: margin-left 0.3s ease;
+}
+
+.sidebar:hover ~ .main-content {
+    margin-left: 200px;
+}
+
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(180, 180, 180, 0.25);
+    color: #2a4b6f;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    font-size: 26px;
+    font-weight: bold;
+    z-index: 100;
+}
+
+.header-left {
+    font-size: 26px;
+    color: #2a4b6f;
+}
+
+.header-right {
+    display: flex;
+    gap: 12px;
+    margin-right: 40px;
+}
+
+.header-btn {
+    background: rgba(255, 255, 255, 0.55);
+    color: #2a4b6f;
+    border: 1px solid #b8c7dd;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.header-btn:hover {
+    background: white;
+    box-shadow: 0 4px 10px rgba(100, 150, 200, 0.25);
+}
+
+/* ========================= RECIPE CARD STYLES ========================= */
+.favorites-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+    padding: 120px 40px;
+}
+
+.recipe-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    width: 320px;
+    padding: 0;
+    box-shadow: 0 8px 25px rgba(42, 75, 111, 0.15);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+}
+
+.recipe-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(42, 75, 111, 0.25);
+}
+
+.recipe-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 20px 20px 0 0;
+    transition: transform 0.3s ease;
+}
+
+.recipe-card:hover .recipe-image {
+    transform: scale(1.05);
+}
+
+.recipe-content {
+    padding: 20px 25px 25px;
+}
+
+.recipe-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #2a4b6f;
+    margin: 0 0 15px 0;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.recipe-heart {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #ff6b6b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.recipe-card:hover .recipe-heart {
+    transform: scale(1.1);
+    background: white;
+}
+
+/* ========================= ENHANCED MODAL ========================= */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 200;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: white;
+    width: 75%;
+    max-width: 900px;
+    margin: 40px auto;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    animation: slideUp 0.4s ease;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes slideUp {
+    from { 
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: white;
+    color: #2a4b6f;
+    padding: 20px 30px;
+    position: relative;
+    border-bottom: 1px solid rgba(42, 75, 111, 0.1);
+}
+
+.close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 32px;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #2a4b6f;
+}
+
+.close:hover {
+    background: rgba(42, 75, 111, 0.1); 
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    display: flex;
+    padding: 0;
+    overflow: hidden;
+    flex: 1;
+}
+
+.modal-image-container {
+    flex: 0 0 40%;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.modal-details {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    max-height: 60vh;
+}
+
+.modal-title {
+    font-size: 28px;
+    margin: 0 0 15px;
+    color: #2a4b6f;
+}
+
+.modal-tags {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.modal-category, .modal-area {
+    background: rgba(42, 75, 111, 0.15);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #2a4b6f;
+}
+
+.modal-section {
+    margin-bottom: 25px;
+}
+
+.modal-section h3 {
+    font-size: 20px;
+    margin: 0 0 15px;
+    color: #2a4b6f;
+    border-bottom: 2px solid rgba(42, 75, 111, 0.2);
+    padding-bottom: 8px;
+}
+
+.ingredients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.ingredient-item {
+    background: rgba(42, 75, 111, 0.08);
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.modal-instructions {
+    line-height: 1.6;
+    color: #444;
+}
+
+@media (max-width: 768px) {
+    .favorites-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        padding: 120px 15px 15px;
+    }
+
+    .modal-content {
+        width: 90%;
+        margin: 20px auto;
+    }
+    
+    .modal-body {
+        flex-direction: column;
+    }
+    
+    .modal-image-container {
+        flex: 0 0 250px;
+    }
+    
+    .ingredients-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.remove-fav-btn {
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.25s ease;
+    margin-right: 60px;
+}
+
+.remove-fav-btn:hover {
+    background: #ff6b6b;
+    color: white;
+    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.25);
+}
+/* ========================= ACCOUNT SETTINGS — OPTIMIZED ========================= */
+
+#accountModal .modal-content {
+    max-width: 430px !important;      /* по-компактно от 500px */
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+#accountModal .modal-body {
+    padding: 22px !important;         /* беше 30px */
+    flex-direction: column;
+}
+
+/* Секции */
+.settings-section {
+    margin-bottom: 22px;              /* беше 30px */
+}
+
+.settings-section h3 {
+    color: #2a4b6f;
+    margin-bottom: 12px;              /* беше 20px */
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Input групи */
+.input-group {
+    margin-bottom: 14px;              /* беше 20px */
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;               /* беше 8px */
+    font-weight: 600;
+    font-size: 13px;                  
+    color: #2a4b6f;
+}
+
+/* Input полета */
+.settings-input {
+    width: 100%;
+    padding: 10px 12px;               /* беше 12px 15px */
+    border: 1px solid #b8c7dd;
+    border-radius: 8px;               /* беше 10px */
+    font-size: 14px;
+    color: #2a4b6f;
+    background: rgba(255, 255, 255, 0.9);
+    transition: 0.25s ease;
+    box-sizing: border-box;
+}
+
+.settings-input:focus {
+    outline: none;
+    border-color: #2a4b6f;
+    box-shadow: 0 0 0 3px rgba(42, 75, 111, 0.15);
+}
+
+.hint {
+    display: block;
+    margin-top: 3px;                  /* беше 5px */
+    font-size: 11px;
+    color: #666;
+}
+
+/* Бутоните */
+.settings-btn {
+    width: 100%;
+    padding: 10px 20px;               /* беше 12px 25px */
+    border-radius: 8px;               /* беше 10px */
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: 0.25s;
+}
+
+.settings-btn.primary {
+    background: #2a4b6f;
+    color: white;
+}
+
+.settings-btn.primary:hover {
+    background: #223b59;
+    transform: translateY(-1px);
+}
+
+.message {
+    margin-top: 10px;           
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: none;
+}
+
+.message.success {
+    display: block;
+    background: rgba(76, 175, 80, 0.1);
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+}
+
+.message.error {
+    display: block;
+    background: rgba(244, 67, 54, 0.1);
+    color: #d32f2f;
+    border: 1px solid #f44336;
+}
+
+.message.info {
+    display: block;
+    background: rgba(33, 150, 243, 0.1);
+    color: #1565c0;
+    border: 1px solid #2196f3;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #2a4b6f;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Делищата линия */
+#accountModal hr {
+    margin: 22px 0;
+    border: none;
+    border-top: 1px solid rgba(42, 75, 111, 0.15);
+}
+
+    </style>
+</head>
+
+<body>
+<div class="header">
+    <div class="header-left">
+        Hello, <%= username %>!
+    </div>
+
+    <div class="header-right">
+        <button class="header-btn" onclick="openAccountModal()">My Account</button>
+        <button class="header-btn" onclick="logout()">Log Out</button>
+    </div>
+</div>
+<div class="sidebar">
+    <div class="sidebar-item" onclick="window.location.href='/home'">
+        <span class="dot">•</span>
+        <span class="label">Home</span>
+    </div>
+
+    <div class="sidebar-item"onclick="window.location.href=`/recipes/myrecipes`">
+        <span class="dot">•</span>
+        <span class="label">My Recipe Cards</span>
+    </div>
+
+    <div class="sidebar-item" onclick="window.location.href='/recipes/myrecipes/browse'">
+        <span class="dot">•</span>
+        <span class="label">Ingredients</span>
+    </div>
+</div>
+<div class="main-content">
+    <div class="favorites-grid" id="favorites-container">
+    </div>
+</div>
+<div id="accountModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h2 style="margin: 0; color: #2a4b6f;">Account Settings</h2>
+            <span class="close" onclick="closeAccountModal()">&times;</span>
+        </div>
+        
+        <div class="modal-body" style="flex-direction: column; padding: 30px;">
+            <!-- Username Change Section -->
+            <div class="settings-section">
+                <h3 style="color: #2a4b6f; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span>👤</span> Change Username
+                </h3>
+                <div class="input-group">
+                    <label for="currentUsername">Current Username</label>
+                    <input 
+                        type="text" 
+                        id="currentUsername" 
+                        class="settings-input"
+                        value="<%= username %>"
+                        readonly
+                        style="background: rgba(42, 75, 111, 0.05);"
+                    >
+                </div>
+                
+                <div class="input-group">
+                    <label for="newUsername">New Username</label>
+                    <input 
+                        type="text" 
+                        id="newUsername" 
+                        class="settings-input"
+                        placeholder="Enter new username"
+                    >
+                    <small class="hint">Username must be 3-20 characters</small>
+                </div>
+                
+                <button 
+                    class="settings-btn primary"
+                    onclick="changeUsername()"
+                    style="margin-top: 15px;"
+                >
+                    Update Username
+                </button>
+                
+                <div id="usernameMessage" class="message"></div>
+            </div>
+            
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid rgba(42, 75, 111, 0.1);">
+
+            <div class="settings-section">
+                <h3 style="color: #2a4b6f; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span>🔒</span> Change Password
+                </h3>
+                
+                <div class="input-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input 
+                        type="password" 
+                        id="currentPassword" 
+                        class="settings-input"
+                        placeholder="Enter current password"
+                    >
+                </div>
+                
+                <div class="input-group">
+                    <label for="newPassword">New Password</label>
+                    <input 
+                        type="password" 
+                        id="newPassword" 
+                        class="settings-input"
+                        placeholder="Enter new password"
+                    >
+                    <small class="hint">Minimum 6 characters with letters and numbers</small>
+                </div>
+                
+                <div class="input-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        class="settings-input"
+                        placeholder="Confirm new password"
+                    >
+                </div>
+                
+                <button 
+                    class="settings-btn primary"
+                    onclick="changePassword()"
+                    style="margin-top: 15px;"
+                >
+                    Update Password
+                </button>
+                
+                <div id="passwordMessage" class="message"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<!-- Modal -->
+<div id="mealModal" class="modal">
+    
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <button class="remove-fav-btn" onclick="removeFav(currentMealId)">
+                ❤ Remove from Favorites
+            </button>
+            <button class="header-btn" onclick="shopping()">
+                🛒 Generate Shopping List
+            </button>
+
+        </div>
+        <div class="modal-body">
+            <div class="modal-image-container">
+                <img id="modalImage" class="modal-img" />
+            </div>
+            <div class="modal-details">
+                <h2 id="modalTitle" class="modal-title"></h2>
+                <div class="modal-tags">
+                    <span id="modalCategory" class="modal-category"></span>
+                    <span id="modalArea" class="modal-area"></span>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Ingredients</h3>
+                    <div id="modalIngredients" class="ingredients-grid"></div>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Instructions</h3>
+                    <p id="modalInstructions" class="modal-instructions"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+async function loadfavorites() {
+    const res = await fetch("/api/favorites/list");
+    const favorites = await res.json();
+
+    for (const id of favorites) {
+        const mealRes = await fetch(`/api/favorites/${id}`);
+        const meal = await mealRes.json();
+        renderMeal(meal);
+    }
+}
+
+function renderMeal(meal) {
+    const container = document.getElementById("favorites-container");
+
+    const card = document.createElement("div");
+    card.className = "recipe-card";
+    card.onclick = () => openModal(meal);
+    card.innerHTML = `
+        <div class="recipe-heart">❤️</div>
+        <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="recipe-image">
+        <div class="recipe-content">
+            <h2 class="recipe-title">${meal.strMeal}</h2>
+        </div>
+    `;
+    
+    container.appendChild(card);
+}
+
+// Extract ingredients from meal object
+function extractIngredients(meal) {
+    const ingredients = [];
+    for (let i = 1; i <= 20; i++) {
+        const ingredient = meal[`strIngredient${i}`];
+        const measure = meal[`strMeasure${i}`];
+        
+        if (ingredient && ingredient.trim() !== '') {
+            ingredients.push(`${measure ? measure.trim() + ' ' : ''}${ingredient.trim()}`);
+        }
+    }
+    return ingredients;
+}
+
+let currentMealId = null;
+
+function openModal(meal) {
+    currentMealId = meal.idMeal;
+    
+    document.getElementById("modalImage").src = meal.strMealThumb;
+    document.getElementById("modalTitle").textContent = meal.strMeal;
+    document.getElementById("modalCategory").textContent = meal.strCategory || 'Not specified';
+    document.getElementById("modalArea").textContent = meal.strArea || 'Not specified';
+    document.getElementById("modalInstructions").textContent = meal.strInstructions || 'No instructions available.';
+
+    const ingContainer = document.getElementById("modalIngredients");
+    ingContainer.innerHTML = "";
+    
+    // Extract ingredients from the meal object
+    const ingredients = extractIngredients(meal);
+    
+    if (ingredients.length > 0) {
+        ingredients.forEach(ingredient => {
+            const div = document.createElement("div");
+            div.className = "ingredient-item";
+            div.textContent = ingredient;
+            ingContainer.appendChild(div);
+        });
+    } else {
+        ingContainer.innerHTML = '<div class="ingredient-item">No ingredients listed</div>';
+    }
+
+    document.getElementById("mealModal").style.display = "block";
+    
+    // Close modal when clicking outside
+    document.getElementById("mealModal").onclick = function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    };
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+}
+
+function closeModal() {
+    document.getElementById("mealModal").style.display = "none";
+}
+
+function logout(){
+    fetch('logout', {
+        method: "POST",
+        credentials: "include"
+    })
+    .then(() => {
+        window.location.href = "/logintest";
+    })
+}
+
+loadfavorites();
+async function removeFav(mealId) {
+    await fetch(`/api/favorites/${mealId}`, {
+        method: "DELETE"
+    });
+    closeModal(); 
+    location.reload(); 
+}
+function shopping() {
+    window.open(
+        `/api/favorites/shopping/${currentMealId}`,
+        'shoppingWindow',
+        'width=600,height=300,menubar=no,toolbar=no,location=no,status=no'
+    );
+}
+async function changeUsername() {
+    const newUsername = document.getElementById("newUsername").value.trim();
+    try {
+        const response = await fetch("/users/update/username", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ newUsername })
+        });
+        const raw = await response.text();
+        const data = JSON.parse(raw);
+        if (!response.ok) {
+            alert(data.message);
+            return;
+        }
+        document.querySelector(".header-left").textContent = `Hello, ${newUsername}!`;
+        closeAccountModal();
+        setTimeout(() => location.reload(), 200);
+    } catch (err) {
+        alert("Network error");
+    }
+}
+async function changePassword() {
+    const currentPassword = document.getElementById("currentPassword").value.trim()
+    const newPassword = document.getElementById("newPassword").value.trim()
+    const confirmPassword = document.getElementById("confirmPassword").value.trim()
+    if(newPassword !== confirmPassword){
+        console.log(newPassword)
+        console.log(confirmPassword)
+        alert("The passwords does not match!")
+        return
+    }
+    try{
+        const response = await fetch("/users/update/password",{
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+        const data = await response.json()
+        if(!response.ok){
+            alert(data.message)
+            return
+        }
+        alert("Password updated successfully!");
+        document.getElementById("currentPassword").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("confirmPassword").value = "";
+        closeAccountModal()
+
+    }catch(err){
+        alert("Server Error!")
+    }
+
+}
+
+function openAccountModal() {
+    document.getElementById("accountModal").style.display = "block";
+}
+
+function closeAccountModal() {
+    document.getElementById("accountModal").style.display = "none";
+}
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+        closeAccountModal();
+    }
+});
+
+
+</script>
+
+</html>

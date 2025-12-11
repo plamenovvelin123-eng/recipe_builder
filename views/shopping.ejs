@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping List</title>
+
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #fafafa;
+        }
+        h2 { 
+            margin-bottom: 20px; 
+            color: #2a4b6f;
+        }
+        .item { 
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 18px;
+            background: #2a4b6f;
+            color: white;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #3a5c80;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Shopping List for <%= mealName || "Meal" %></h2>
+
+<div id="items">
+    <% if (ingredients && ingredients.length > 0) { %>
+        <% ingredients.forEach(i => { %>
+            <div class="item">
+                <%= i.ingredient %> — <%= i.measure %>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <p>No ingredients found.</p>
+    <% } %>
+</div>
+
+<button onclick="download()">Download as TXT</button>
+
+<script>
+function download() {
+    let text = `Your Shopping List for your meal \n`;
+
+    <% ingredients.forEach(i => { %>
+        text += `<%= i.ingredient %> <%= i.measure %>\n`;
+    <% }); %>
+
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "shopping-list.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+
+</body>
+</html>

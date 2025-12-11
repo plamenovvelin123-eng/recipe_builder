@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+
+<style>
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: Arial;
+}
+
+/* BACKGROUND VIDEO */
+video.bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    object-fit: cover;
+    z-index: -2;
+}
+
+/* LIGHT BEIGE OVERLAY (optional) */
+.overlay-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(242, 233, 216, 0.15); /* soft beige tint */
+    z-index: -1;
+}
+
+.panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 420px;
+
+    /* GLASS EFFECT */
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    border-left: 1px solid rgba(255,255,255,0.35);
+    box-shadow: -5px 0 20px rgba(0,0,0,0.25);
+
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 32px;
+    color: white;
+    font-weight: 600;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    font-size: 16px;
+
+    /* glass input style */
+    background: rgba(255,255,255,0.18);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 10px;
+
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+input::placeholder {
+    color: rgba(255,255,255,0.75);
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    border: none;
+    font-size: 18px;
+    font-weight: bold;
+
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+button:hover {
+    background: white;
+    transform: scale(1.02);
+}
+
+.switch {
+    margin-top: 15px;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.switch:hover {
+    text-decoration: underline;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s ease;
+    z-index: 10;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-box {
+    background: rgba(255,255,255,0.15);
+    padding: 30px;
+    width: 400px;
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 15px;
+    color: white;
+
+    animation: popup 0.25s ease;
+}
+
+@keyframes popup {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.close-btn {
+    background: rgba(255,255,255,0.85);
+    color: #333;
+    margin-top: 10px;
+}
+.input-error {
+    border: 1px solid #ff4444 !important;
+    box-shadow: 0 0 8px rgba(255, 40, 40, 0.5);
+}
+</style>
+</head>
+
+<body>
+
+<video class="bg-video" autoplay loop muted playsinline>
+    <source src="/background.mp4" type="video/mp4">
+</video>
+
+<div class="overlay-bg"></div>
+
+
+<div class="panel">
+
+    <div id="errorBox" style="
+    margin-bottom: 12px;
+    color: #ff3333;
+    font-weight: bold;
+    text-align: center;
+    min-height: 20px;
+"></div>
+
+<input type="text" id="loginUser" placeholder="Username">
+<input type="password" id="loginPass" placeholder="Password">
+    <button onclick="login()">Login</button>
+
+    <div class="switch" onclick="openRegisterPopup()">Don't have an account? Register</div>
+</div>
+
+<div class="modal-overlay" id="registerPopup">
+    <div class="modal-box">
+        <h2>Register</h2>
+        <div id="registerError" style="
+            margin-bottom: 12px;
+            color: #ff3333;
+            font-weight: bold;
+            text-align: center;
+            min-height: 20px;"           
+        ></div>
+
+
+
+        <input type="text" id="regUser" placeholder="Username">
+        <input type="password" id="regPass" placeholder="Password">
+        <input type="text" id="regEmail" placeholder="Email">
+
+
+        <button onclick="register()">Create Account</button>
+        <button class="close-btn" onclick="closeRegisterPopup()">Close</button>
+    </div>
+</div>
+
+
+<script>
+
+function openRegisterPopup() {
+    document.getElementById("registerPopup").classList.add("active");
+}
+
+function closeRegisterPopup() {
+    document.getElementById("registerPopup").classList.remove("active");
+}
+
+async function login() {
+    const username = document.getElementById("loginUser").value.trim();
+    const password = document.getElementById("loginPass").value.trim();
+    const errorBox = document.getElementById("errorBox");
+
+    errorBox.textContent = "";
+
+    const response = await fetch("/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    });
+
+    let result = {};
+    try {
+        result = await response.json();
+    } catch {
+        result.message = "Unexpected server response.";
+    }
+
+    switch (response.status) {
+        case 200:
+            window.location.href = "/home";
+            break;
+        case 401:
+            errorBox.textContent = "Incorrect password.";
+            break;
+        case 404:
+            errorBox.textContent = "User not found.";
+            break;
+        case 500:
+            errorBox.textContent = "Server error. Try again later.";
+            break;
+        default:
+            errorBox.textContent = result.message || "Unknown error.";
+            break;
+    }
+}
+
+async function register() {
+    const username = document.getElementById("regUser").value.trim();
+    const password = document.getElementById("regPass").value.trim();
+    const email = document.getElementById("regEmail").value.trim()
+    const errorBox = document.getElementById("registerError");
+
+    errorBox.textContent = "";
+
+    const response = await fetch("/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, email }),
+        credentials: "include"
+    });
+
+
+    let result = {};
+    try {
+        result = await response.json();
+    } catch {
+        result.message = "Unexpected server response.";
+    }
+
+    switch (response.status) {
+        case 201:
+            closeRegisterPopup();
+            alert("Registration successful!");
+            break;
+        
+        case 409:
+            errorBox.textContent = "Username already exists.";
+            break;
+        
+        case 400:
+            errorBox.textContent = result.message;
+            break;
+
+        case 500:
+            errorBox.textContent = "Server error. Please try again.";
+            break;
+
+        default:
+            errorBox.textContent = result.message || "Unknown error.";
+            break;
+    }
+}
+</script>

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Browse Products</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+
+    background: url("/images/ingredients.png") no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* ===== HEADER ===== */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(180, 180, 180, 0.25);
+    color: #2a4b6f;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    font-size: 26px;
+    font-weight: bold;
+    z-index: 100;
+}
+
+.header-left {
+    font-size: 26px;
+    color: #2a4b6f;
+}
+
+.header-right {
+    display: flex;
+    gap: 12px;
+    margin-right: 40px;
+}
+
+.header-btn {
+    background: rgba(255, 255, 255, 0.55);
+    color: #2a4b6f;
+    border: 1px solid #b8c7dd;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.header-btn:hover {
+    background: white;
+    box-shadow: 0 4px 10px rgba(100, 150, 200, 0.25);
+}
+
+.sidebar {
+    width: 60px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 90px;
+    background: white;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    transition: width 0.3s ease;
+    overflow: hidden;
+    z-index: 50;
+}
+
+.sidebar:hover {
+    width: 200px;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 22px;
+    margin: 20px 10px;
+    font-size: 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-radius: 12px;
+    color: #2a4b6f;
+    transition: 0.25s ease;
+}
+
+.sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.55);
+    transform: translateX(5px);
+}
+
+.label {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: 0.3s ease;
+}
+
+.sidebar:hover .label {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+
+.main {
+    margin-left: 60px;
+    padding: 120px 40px 40px;
+    width: calc(100% - 60px);
+    transition: .3s ease;
+}
+
+.sidebar:hover ~ .main {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 35px;
+}
+.product-card {
+    background: white;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(120,150,180,0.25);
+    transition: .25s;
+    cursor: pointer;
+}
+.product-card:hover {
+    transform: translateY(-4px) scale(1.03);
+}
+.product-img {
+    width: 100%;
+    height: 160px;
+    object-fit: contain;
+    background: #eef3ff;
+    border-radius: 12px;
+}
+.title {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #2a4b6f;
+    font-size: 17px;
+}
+.badges {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+}
+.badges img {
+    height: 34px;
+}
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.search-input {
+    padding: 12px;
+    width: 300px;
+    border-radius: 12px;
+    border: 1px solid #b8c7dd;
+    font-size: 15px;
+}
+.h1 {
+    font-size: 52px;
+    margin-bottom: 20px;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    font-weight: bold;
+}
+/* ========================= ACCOUNT MODAL ONLY ========================= */
+.account-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.account-modal[style*="display: flex"] {
+    opacity: 1;
+}
+
+.account-modal-content {
+    background: white;
+    width: 430px;
+    max-width: 90%;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+    animation: accountModalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes accountModalSlideIn {
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.account-modal-header {
+    background: white;
+    color: #2a4b6f;
+    padding: 20px 30px;
+    position: relative;
+    border-bottom: 1px solid rgba(42, 75, 111, 0.1);
+}
+
+.account-modal-header h2 {
+    margin: 0;
+    color: #2a4b6f;
+    font-size: 24px;
+}
+
+.account-close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 32px;
+    cursor: pointer;
+    color: #2a4b6f;
+    transition: 0.3s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.account-close:hover {
+    background: rgba(42, 75, 111, 0.1);
+    transform: rotate(90deg);
+}
+
+.account-modal-body {
+    padding: 22px 30px 30px 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.account-section {
+    margin-bottom: 22px;
+}
+
+.account-section h3 {
+    color: #2a4b6f;
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.account-input-group {
+    margin-bottom: 14px;
+}
+
+.account-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #2a4b6f;
+}
+
+.account-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #b8c7dd;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #2a4b6f;
+    background: rgba(255, 255, 255, 0.9);
+    transition: 0.25s ease;
+    box-sizing: border-box;
+}
+
+.account-input:focus {
+    outline: none;
+    border-color: #2a4b6f;
+    box-shadow: 0 0 0 3px rgba(42, 75, 111, 0.15);
+}
+
+.account-input[readonly] {
+    background: rgba(42, 75, 111, 0.05);
+    cursor: not-allowed;
+}
+
+.account-hint {
+    display: block;
+    margin-top: 3px;
+    font-size: 11px;
+    color: #666;
+}
+
+.account-btn {
+    width: 100%;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: 0.25s;
+}
+
+.account-btn-primary {
+    background: #2a4b6f;
+    color: white;
+}
+
+.account-btn-primary:hover {
+    background: #223b59;
+    transform: translateY(-1px);
+}
+
+.account-message {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: none;
+}
+
+.account-message.success {
+    display: block;
+    background: rgba(76, 175, 80, 0.1);
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+}
+
+.account-message.error {
+    display: block;
+    background: rgba(244, 67, 54, 0.1);
+    color: #d32f2f;
+    border: 1px solid #f44336;
+}
+
+.account-message.info {
+    display: block;
+    background: rgba(33, 150, 243, 0.1);
+    color: #1565c0;
+    border: 1px solid #2196f3;
+}
+
+.account-divider {
+    margin: 22px 0;
+    border: none;
+    border-top: 1px solid rgba(42, 75, 111, 0.15);
+}
+
+/* Responsive for account modal only */
+@media (max-width: 480px) {
+    .account-modal-content {
+        width: 95%;
+    }
+    
+    .account-modal-header {
+        padding: 15px 20px;
+    }
+    
+    .account-modal-body {
+        padding: 15px 20px 20px 20px;
+    }
+}
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #DDCFB7; 
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  animation: spin 2s linear infinite;
+  z-index: 1000;
+  display: none; /* hidden at start */
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div>Hello, <%= username %>!</div>
+
+    <div class="header-right">
+        <button class="header-btn" onclick="openAccountModal()">My Account</button>
+        <button class="header-btn" onclick="logout()">Log Out</button>
+    </div>
+</div>
+    <!-- ACCOUNT SETTINGS MODAL (UPDATED) -->
+<div id="accountModal" class="account-modal">
+    <div class="account-modal-content">
+        <div class="account-modal-header">
+            <h2>Account Settings</h2>
+            <span class="account-close" onclick="closeAccountModal()">&times;</span>
+        </div>
+        
+        <div class="account-modal-body">
+            <!-- Username Change Section -->
+            <div class="account-section">
+                <h3><span>👤</span> Change Username</h3>
+                <div class="account-input-group">
+                    <label for="currentUsername">Current Username</label>
+                    <input 
+                        type="text" 
+                        id="currentUsername" 
+                        class="account-input"
+                        value="<%= username %>"
+                        readonly
+                    >
+                </div>
+                
+                <div class="account-input-group">
+                    <label for="newUsername">New Username</label>
+                    <input 
+                        type="text" 
+                        id="newUsername" 
+                        class="account-input"
+                        placeholder="Enter new username"
+                    >
+                    <small class="account-hint">Username must be 3-20 characters</small>
+                </div>
+                
+                <button 
+                    class="account-btn account-btn-primary"
+                    onclick="changeUsername()"
+                    style="margin-top: 15px;"
+                >
+                    Update Username
+                </button>
+                
+                <div id="usernameMessage" class="account-message"></div>
+            </div>
+            
+            <hr class="account-divider">
+
+            <div class="account-section">
+                <h3><span>🔒</span> Change Password</h3>
+                
+                <div class="account-input-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input 
+                        type="password" 
+                        id="currentPassword" 
+                        class="account-input"
+                        placeholder="Enter current password"
+                    >
+                </div>
+                
+                <div class="account-input-group">
+                    <label for="newPassword">New Password</label>
+                    <input 
+                        type="password" 
+                        id="newPassword" 
+                        class="account-input"
+                        placeholder="Enter new password"
+                    >
+                    <small class="account-hint">Minimum 6 characters with letters and numbers</small>
+                </div>
+                
+                <div class="account-input-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        class="account-input"
+                        placeholder="Confirm new password"
+                    >
+                </div>
+                
+                <button 
+                    class="account-btn account-btn-primary"
+                    onclick="changePassword()"
+                    style="margin-top: 15px;"
+                >
+                    Update Password
+                </button>
+                
+                <div id="passwordMessage" class="account-message"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar">
+    <div class="sidebar-item" onclick="location.href='/home'">
+        <span class="dot">•</span>
+        <span class="label">Home</span>
+    </div>
+
+    <div class="sidebar-item" onclick="location.href='/recipes/myrecipes'">
+        <span class="dot">•</span>
+        <span class="label">My Recipe Cards</span>
+    </div>
+ 
+    
+    <div class="sidebar-item" onclick="location.href='/favorites'">
+        <span class="dot">•</span>
+        <span class="label">Favorites</span>
+    </div>
+</div>
+
+
+<!-- MAIN CONTENT -->
+<div class="main">
+<div class="h1">Browse for the perfect ingredients for your recipes</div>
+    <!-- SEARCH BAR -->
+    <div class="search-bar">
+        <input id="searchInput" class="search-input" placeholder="Find your ingredients...">
+        <button onclick="search()" class="header-btn">Search</button>
+    </div>
+    <div id="loader" class="loader" style="display:none; margin: 0 auto;"></div>
+
+    <!-- RESULTS -->
+    <div id="resultsGrid" class="results-grid"></div>
+</div>
+
+<script>
+async function search() {
+    const product = document.getElementById("searchInput").value.trim();
+    if (!product) return;
+
+    document.getElementById("loader").style.display = "block"; // SHOW LOADER
+
+    try {
+        const res = await fetch(`/api/browse/${product}`);
+        const data = await res.json();
+        renderResults(data);
+    } catch (err) {
+        alert("Error fetching results");
+    } finally {
+        document.getElementById("loader").style.display = "none"; // HIDE LOADER
+    }
+}
+
+
+function renderResults(products) {
+    const grid = document.getElementById("resultsGrid");
+    grid.innerHTML = "";
+
+    for (const p of products) {
+        grid.innerHTML += `
+            <div class="product-card" onclick="forwardToOFF('${p.code}')">
+                <img src="${p.image}" class="product-img">
+
+                <div class="title">${p.name}</div>
+
+                <div class="badges">
+                    ${p.nutriscore ? `<img src="/images/nutriscore-${p.nutriscore}.png">` : ""}
+                    ${p.nova ? `<img src="/images/nova-${p.nova}.png">` : ""}
+                    ${p.ecoscore ? `<img src="/images/eco-${p.ecoscore}.png">` : ""}
+                </div>
+            </div>
+        `;
+    }
+}
+
+function forwardToOFF(code) {
+    if (!code) return;
+    window.location.href = `/api/forward/${code}`;
+}
+function logout(){
+    fetch('logout', {
+        method: "POST",
+        credentials: "include"
+    })
+    .then(() => {
+        window.location.href = "/logintest";
+    });
+}
+async function changeUsername() {
+    const newUsername = document.getElementById("newUsername").value.trim();
+    try {
+        const response = await fetch("/users/update/username", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ newUsername })
+        });
+        const raw = await response.text();
+        const data = JSON.parse(raw);
+        if (!response.ok) {
+            alert(data.message);
+            return;
+        }
+        document.querySelector(".header-left").textContent = `Hello, ${newUsername}!`;
+        closeAccountModal();
+        setTimeout(() => location.reload(), 200);
+    } catch (err) {
+        alert("Network error");
+    }
+}
+async function changePassword() {
+    const currentPassword = document.getElementById("currentPassword").value.trim()
+    const newPassword = document.getElementById("newPassword").value.trim()
+    const confirmPassword = document.getElementById("confirmPassword").value.trim()
+    if(newPassword !== confirmPassword){
+        console.log(newPassword)
+        console.log(confirmPassword)
+        alert("The passwords does not match!")
+        return
+    }
+    try{
+        const response = await fetch("/users/update/password",{
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+        const data = await response.json()
+        if(!response.ok){
+            alert(data.message)
+            return
+        }
+        alert("Password updated successfully!");
+        document.getElementById("currentPassword").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("confirmPassword").value = "";
+        closeAccountModal()
+
+    }catch(err){
+        alert("Server Error!")
+    }
+
+}
+
+
+function openAccountModal() {
+    document.getElementById("accountModal").style.display = "flex";
+}
+
+function closeAccountModal() {
+    document.getElementById("accountModal").style.display = "none";
+}
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+        closeAccountModal();
+    }
+});
+</script>
+
+</body>
+</html>

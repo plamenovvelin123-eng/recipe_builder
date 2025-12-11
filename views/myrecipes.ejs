@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Recipes</title>
+
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    background: url("/images/background.png") no-repeat center center fixed;
+    background-size: cover;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(180, 180, 180, 0.25);
+    color: #2a4b6f;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    font-size: 26px;
+    font-weight: bold;
+    z-index: 100;
+}
+
+.header-left {
+    font-size: 26px;
+    color: #2a4b6f;
+}
+
+
+.header-right {
+    display: flex;
+    gap: 12px;
+    margin-right: 40px;
+}
+
+.header-btn {
+    background: rgba(255, 255, 255, 0.55);
+    color: #2a4b6f;
+    border: 1px solid #b8c7dd;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.header-btn:hover {
+    background: white;
+    box-shadow: 0 4px 10px rgba(100, 150, 200, 0.25);
+}
+
+
+.sidebar {
+    width: 60px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 90px;
+    background: white;
+    border-right: 1px solid rgba(0,0,0,0.1);
+    transition: width 0.3s ease;
+    overflow: hidden;
+    z-index: 50;
+}
+
+.sidebar:hover {
+    width: 200px;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 22px;
+    margin: 20px 10px;
+    font-size: 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-radius: 12px;
+    color: #2a4b6f;
+    transition: 0.25s ease;
+}
+
+.dot {
+    font-size: 20px;
+}
+
+.label {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: 0.3s ease;
+}
+
+.sidebar:hover .label {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.55);
+    transform: translateX(5px);
+}
+
+
+.main {
+    margin-left: 60px;
+    padding: 120px 30px 30px 30px;
+    width: 100%;
+}
+
+/* ========================= GRID ========================= */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 280px);
+    gap: 40px;
+    justify-content: center;
+}
+
+.grid:has(.add-tile:only-child) {
+    grid-template-columns: 280px;
+    justify-items: center;
+}
+
+/* ========================= ADD TILE ========================= */
+.add-tile {
+    width: 280px;
+    height: 340px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 2px dashed #7a9bbf;
+    border-radius: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.add-tile:hover {
+    background: white;
+    border-color: #4c7eb3;
+}
+
+/* ========================= TILE ========================= */
+.tile {
+    position: relative;
+    width: 280px;
+    height: 340px;
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(120, 150, 180, 0.25);
+    transition: 0.25s ease;
+}
+
+.tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tile:hover {
+    transform: scale(1.04);
+}
+
+.tile-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.45), transparent 40%);
+    color: white;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    opacity: 0;
+    transition: 0.3s ease;
+}
+
+.tile:hover .tile-overlay {
+    opacity: 1;
+}
+
+/* ========================= RECIPE MODALS (Add/Edit/View) ========================= */
+.modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal[style*="display: flex"] {
+    opacity: 1;
+}
+
+/* Recipe Modal Content */
+.modal-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+    width: 500px;
+    padding: 0;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+    animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4c7eb3, #2a4b6f);
+}
+
+@keyframes modalSlideIn {
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* View Modal Content */
+.view-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+    width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 20px;
+    position: relative;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+    animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    display: flex;
+    flex-direction: column;
+}
+
+.view-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4c7eb3, #2a4b6f);
+}
+
+/* View Modal Image */
+.view-img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+#viewDish {
+    font-size: 28px;
+    color: #2a4b6f;
+    margin: 25px 25px 15px 25px;
+    text-align: center;
+}
+
+.view-section {
+    padding: 0 25px 20px 25px;
+}
+
+.view-section h3 {
+    color: #2a4b6f;
+    font-size: 18px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #e1e8f0;
+    padding-bottom: 8px;
+}
+
+.view-section p {
+    background: #f8fbff;
+    border: 2px solid #e1e8f0;
+    padding: 15px;
+    border-radius: 12px;
+    line-height: 1.6;
+    margin: 0;
+    color: #2a4b6f;
+}
+
+/* Close buttons */
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    cursor: pointer;
+    font-size: 28px;
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* Scrollbar */
+.view-content {
+    scrollbar-width: thin;
+    scrollbar-color: #4c7eb3 #f1f1f1;
+}
+
+.view-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.view-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 0 20px 20px 0;
+}
+
+.view-content::-webkit-scrollbar-thumb {
+    background: #4c7eb3;
+    border-radius: 4px;
+}
+
+.view-content::-webkit-scrollbar-thumb:hover {
+    background: #2a4b6f;
+}
+
+/* ========================= EDIT + DELETE BUTTONS ========================= */
+.view-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 25px 0 35px 0;
+}
+
+.view-btn {
+    padding: 12px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(76, 126, 179, 0.3);
+}
+
+.view-btn.edit {
+    background: linear-gradient(135deg, #4c7eb3, #2a4b6f);
+    color: white;
+}
+
+.view-btn.edit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(76, 126, 179, 0.45);
+}
+
+.view-btn.delete {
+    background: #b53a3a;
+    color: white;
+    box-shadow: 0 4px 15px rgba(179, 58, 58, 0.25);
+}
+
+.view-btn.delete:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(179, 58, 58, 0.45);
+}
+
+/* Recipe Form Styles */
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 25px 35px 35px 35px;
+}
+
+.modal-content label {
+    font-weight: bold;
+    color: #2a4b6f;
+}
+
+.modal-content input[type="text"],
+.modal-content textarea,
+.modal-content input[type="file"] {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #b8c7dd;
+    font-size: 14px;
+}
+
+.modal-content textarea {
+    resize: none;
+    height: 80px;
+}
+
+.modal-content button {
+    margin-top: 10px;
+    padding: 12px;
+    background: linear-gradient(135deg, #4c7eb3, #2a4b6f);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.modal-content button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 126, 179, 0.45);
+}
+
+/* ========================= ACCOUNT MODAL (NEW STYLES - NO CONFLICT) ========================= */
+.account-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.account-modal[style*="display: flex"] {
+    opacity: 1;
+}
+
+.account-modal-content {
+    background: white;
+    width: 430px;
+    max-width: 90%;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+    animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.account-modal-header {
+    background: white;
+    color: #2a4b6f;
+    padding: 20px 30px;
+    position: relative;
+    border-bottom: 1px solid rgba(42, 75, 111, 0.1);
+}
+
+.account-modal-header h2 {
+    margin: 0;
+    color: #2a4b6f;
+}
+
+.account-close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 32px;
+    cursor: pointer;
+    color: #2a4b6f;
+    transition: 0.3s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.account-close:hover {
+    background: rgba(42, 75, 111, 0.1);
+    transform: rotate(90deg);
+}
+
+.account-modal-body {
+    padding: 22px 30px 30px 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.account-section {
+    margin-bottom: 22px;
+}
+
+.account-section h3 {
+    color: #2a4b6f;
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.account-input-group {
+    margin-bottom: 14px;
+}
+
+.account-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #2a4b6f;
+}
+
+.account-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #b8c7dd;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #2a4b6f;
+    background: rgba(255, 255, 255, 0.9);
+    transition: 0.25s ease;
+    box-sizing: border-box;
+}
+
+.account-input:focus {
+    outline: none;
+    border-color: #2a4b6f;
+    box-shadow: 0 0 0 3px rgba(42, 75, 111, 0.15);
+}
+
+.account-input[readonly] {
+    background: rgba(42, 75, 111, 0.05);
+    cursor: not-allowed;
+}
+
+.account-hint {
+    display: block;
+    margin-top: 3px;
+    font-size: 11px;
+    color: #666;
+}
+
+.account-btn {
+    width: 100%;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: 0.25s;
+}
+
+.account-btn-primary {
+    background: #2a4b6f;
+    color: white;
+}
+
+.account-btn-primary:hover {
+    background: #223b59;
+    transform: translateY(-1px);
+}
+
+.account-message {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: none;
+}
+
+.account-message.success {
+    display: block;
+    background: rgba(76, 175, 80, 0.1);
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+}
+
+.account-message.error {
+    display: block;
+    background: rgba(244, 67, 54, 0.1);
+    color: #d32f2f;
+    border: 1px solid #f44336;
+}
+
+.account-message.info {
+    display: block;
+    background: rgba(33, 150, 243, 0.1);
+    color: #1565c0;
+    border: 1px solid #2196f3;
+}
+
+.account-divider {
+    margin: 22px 0;
+    border: none;
+    border-top: 1px solid rgba(42, 75, 111, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .main {
+        padding: 120px 15px 30px 15px;
+    }
+    
+    .view-content {
+        width: 90%;
+    }
+    
+    .account-modal-content {
+        width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-right {
+        margin-right: 15px;
+    }
+}
+.header-search {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.header-search input {
+    width: 300px;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1px solid #b8c7dd;
+    background: rgba(255, 255, 255, 0.55);
+    font-size: 15px;
+    color: #2a4b6f;
+    transition: 0.25s ease;
+}
+
+.header-search input:focus {
+    background: white;
+    outline: none;
+    box-shadow: 0 4px 12px rgba(100, 150, 200, 0.25);
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-left">
+        Hello, <%= username %>!
+    </div>
+    <div class="header-search">
+    <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Search by ingredients..."
+        oninput="searchByIngredients()"
+    >
+    </div>
+    <div class="header-right">
+        <button class="header-btn" onclick="openAccountModal()">My Account</button>
+        <button class="header-btn" onclick="logout()">Log Out</button>
+    </div>
+</div>
+
+<div id="accountModal" class="account-modal">
+    <div class="account-modal-content">
+        <div class="account-modal-header">
+            <h2>Account Settings</h2>
+            <span class="account-close" onclick="closeAccountModal()">&times;</span>
+        </div>
+        
+        <div class="account-modal-body">
+            <div class="account-section">
+                <h3><span>👤</span> Change Username</h3>
+                <div class="account-input-group">
+                    <label for="currentUsername">Current Username</label>
+                    <input 
+                        type="text" 
+                        id="currentUsername" 
+                        class="account-input"
+                        value="<%= username %>"
+                        readonly
+                    >
+                </div>
+                
+                <div class="account-input-group">
+                    <label for="newUsername">New Username</label>
+                    <input 
+                        type="text" 
+                        id="newUsername" 
+                        class="account-input"
+                        placeholder="Enter new username"
+                    >
+                    <small class="account-hint">Username must be 3-20 characters</small>
+                </div>
+                
+                <button 
+                    class="account-btn account-btn-primary"
+                    onclick="changeUsername()"
+                    style="margin-top: 15px;"
+                >
+                    Update Username
+                </button>
+                
+                <div id="usernameMessage" class="account-message"></div>
+            </div>
+            
+            <hr class="account-divider">
+
+            <div class="account-section">
+                <h3><span>🔒</span> Change Password</h3>
+                
+                <div class="account-input-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input 
+                        type="password" 
+                        id="currentPassword" 
+                        class="account-input"
+                        placeholder="Enter current password"
+                    >
+                </div>
+                
+                <div class="account-input-group">
+                    <label for="newPassword">New Password</label>
+                    <input 
+                        type="password" 
+                        id="newPassword" 
+                        class="account-input"
+                        placeholder="Enter new password"
+                    >
+                    <small class="account-hint">Minimum 6 characters with letters and numbers</small>
+                </div>
+                
+                <div class="account-input-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        class="account-input"
+                        placeholder="Confirm new password"
+                    >
+                </div>
+                
+                <button 
+                    class="account-btn account-btn-primary"
+                    onclick="changePassword()"
+                    style="margin-top: 15px;"
+                >
+                    Update Password
+                </button>
+                
+                <div id="passwordMessage" class="account-message"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar">
+<div class="sidebar-item" onclick="window.location.href='/home'">
+    <span class="dot">•</span>
+    <span class="label">Home</span>
+</div>
+
+    <div class="sidebar-item"onclick="window.location.href=`/recipes/myrecipes/browse`">
+        <span class="dot">•</span>
+        <span class="label">Ingredients</span>
+    </div>
+
+    <div class="sidebar-item"onclick="window.location.href=`/favorites`">
+        <span class="dot">•</span>
+        <span class="label">Favorites</span>
+    </div>
+</div>
+
+<div class="main">
+    <div class="grid">
+        <div class="add-tile" onclick="openModal()">
+            <h1 style="font-size: 64px; color:#4c7eb3;">+</h1>
+        </div>
+
+        <% recipes.forEach(r => { %>
+            <div class="tile"
+                onclick="openView(
+                    '<%= r.img %>',
+                    '<%= r.Dish %>',
+                    `<%= r.Ingredients %>`,
+                    `<%= r.Instructions %>`,
+                    `<%= r.Description %>`,
+                    '<%= r._id %>'
+                )">
+                <img src="<%= r.img %>" />
+                <div class="tile-overlay">
+                    <div style="font-size: 20px; font-weight: bold;"><%= r.Dish %></div>
+                    <div style="opacity: 0.9; font-size: 15px;"><%= r.Description || "No description" %></div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+
+<div id="recipeModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+
+        <h2 style="text-align:center; margin-top:20px; color:#2a4b6f;">Add Recipe</h2>
+
+        <form action="/recipes" method="POST" enctype="multipart/form-data">
+
+            <label>Dish:</label>
+            <input type="text" name="Dish" required>
+
+            <label>Ingredients:</label>
+            <input type="text" name="Ingredients" required>
+
+            <label>Instructions:</label>
+            <textarea name="Instructions" required></textarea>
+
+            <label>Description:</label>
+            <textarea name="Description"></textarea>
+
+            <label>Image:</label>
+            <input type="file" name="img">
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" style="flex: 1;">Create</button>
+                <button type="button" onclick="closeModal()" style="background: #6c757d; flex: 1;">Cancel</button>
+                
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeEditModal()">&times;</span>
+        
+        <h2 style="text-align:center; margin-top:20px; color:#2a4b6f;">Edit Recipe</h2>
+        
+        <form id="editForm">
+            <label>Dish Name:</label>
+            <input type="text" id="editDish" name="Dish" required>
+            
+            <label>Ingredients:</label>
+            <textarea id="editIngredients" name="Ingredients" required></textarea>
+            
+            <label>Instructions:</label>
+            <textarea id="editInstructions" name="Instructions" required></textarea>
+            
+            <label>Description:</label>
+            <textarea id="editDescription" name="Description"></textarea>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="editRecipe(currentRecipeId)" style="flex: 1;">Save Changes</button>
+                <button type="button" onclick="closeEditModal()" style="background: #6c757d; flex: 1;">Cancel</button>
+                
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div id="viewModal" class="modal">
+    <div class="view-content">
+        <span class="close-btn" onclick="closeView()">&times;</span>
+
+        <img id="viewImg" class="view-img" src="" alt="Recipe Image">
+
+        <h2 id="viewDish"></h2>
+
+        <div class="view-section">
+            <h3>Ingredients</h3>
+            <p id="viewIngredients"></p>
+        </div>
+
+        <div class="view-section">
+            <h3>Instructions</h3>
+            <p id="viewInstructions"></p>
+        </div>
+
+        <div class="view-section">
+            <h3>Description</h3>
+            <p id="viewDescription"></p>
+        </div>
+
+        <div class="view-buttons">
+            <button class="view-btn edit" onclick="openEdit()">Edit</button>
+            <button class="view-btn delete" onclick="deleteRecipe(currentRecipeId)">Delete</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function openModal() {
+    document.getElementById("recipeModal").style.display = "flex";
+    document.body.style.overflow = "hidden";
+}
+
+function closeModal() {
+    document.getElementById("recipeModal").style.display = "none";
+    document.body.style.overflow = "auto";
+}
+
+let currentRecipeId = null;
+
+function openView(img, dish, ingredients, instructions, description, id) {
+    currentRecipeId = id;
+
+    document.getElementById("viewImg").src = img;
+    document.getElementById("viewDish").innerText = dish;
+    document.getElementById("viewIngredients").innerText = ingredients;
+    document.getElementById("viewInstructions").innerText = instructions;
+    document.getElementById("viewDescription").innerText = description || "No description available";
+
+    document.getElementById("viewModal").style.display = "flex";
+    document.body.style.overflow = "hidden";
+}
+
+function closeView() {
+    document.getElementById("viewModal").style.display = "none";
+    document.body.style.overflow = "auto";
+}
+
+function logout(){
+    fetch('logout', {
+        method: "POST",
+        credentials: "include"
+    })
+    .then(() => {
+        window.location.href = "/logintest";
+    })
+}
+
+async function deleteRecipe(id) {
+    if (!confirm("Are you sure you want to delete this recipe?")) return;
+
+    await fetch(`/recipes/${id}`,{
+        method: "DELETE"
+    });
+    
+    location.reload();
+}
+
+function validateBeforeSubmit() {
+    const fileInput = document.querySelector('input[name="img"]');
+
+    if (!fileInput.files || fileInput.files.length === 0) {
+        alert("Please Upload a picture of your dish!");
+        return false;
+    }
+    return true;
+}
+
+function openEdit() {
+    closeView()
+    const dish = document.getElementById('viewDish').innerText;
+    const ingredients = document.getElementById('viewIngredients').innerText;
+    const instructions = document.getElementById('viewInstructions').innerText;
+    const description = document.getElementById('viewDescription').innerText;
+    document.getElementById('editDish').value = dish;
+    document.getElementById('editIngredients').value = ingredients;
+    document.getElementById('editInstructions').value = instructions;
+    document.getElementById('editDescription').value = description;
+    document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+
+function editRecipe(id){
+    const updates = {
+        Dish: document.getElementById('editDish').value,
+        Ingredients: document.getElementById('editIngredients').value,
+        Instructions: document.getElementById('editInstructions').value,
+        Description: document.getElementById('editDescription').value
+    }
+    fetch(`/recipes/${id}`, {
+        method: "PATCH",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(updates)
+    })
+    .then(response => response.json())
+    .then(data =>{
+        closeEditModal();
+        closeView();
+        location.reload();
+    })
+    .catch(error => console.error('Error:', error));
+}
+function openAccountModal() {
+    document.getElementById("accountModal").style.display = "flex";
+}
+
+function closeAccountModal() {
+    document.getElementById("accountModal").style.display = "none";
+}
+
+
+async function changeUsername() {
+    const newUsername = document.getElementById("newUsername").value.trim();
+
+    try {
+        const response = await fetch("/users/update/username", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ newUsername })
+        });
+
+        const raw = await response.text();
+        const data = JSON.parse(raw);
+
+        if (!response.ok) {
+            alert(data.message);
+            return;
+        }
+
+        document.querySelector(".header-left").textContent = `Hello, ${newUsername}!`;
+        closeAccountModal();
+        setTimeout(() => location.reload(), 200);
+
+    } catch (err) {
+        alert("Network error");
+    }
+}
+
+async function changePassword() {
+    const currentPassword = document.getElementById("currentPassword").value.trim();
+    const newPassword = document.getElementById("newPassword").value.trim();
+    const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+    if (newPassword !== confirmPassword) {
+        alert("The passwords do not match!");
+        return;
+    }
+    try {
+        const response = await fetch("/users/update/password", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.message);
+            return;
+        }
+
+        alert("Password updated successfully!");
+        closeAccountModal();
+
+    } catch (err) {
+        alert("Server Error!");
+    }
+}
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") closeAccountModal();
+});
+
+
+async function searchByIngredients() {
+    const q = document.getElementById("searchInput").value.trim();
+
+    if (q.length === 0) {
+        location.reload();
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/my/ingredients/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+
+        if (res.ok) {
+            return renderResultsByIngredients(data);
+        } else {
+            return renderResultsByIngredients([]);
+        }
+    } catch (err) {
+        console.error(err);
+        renderResultsByIngredients([]);
+    }
+}
+
+function renderResultsByIngredients(recipes) {
+    const grid = document.querySelector(".grid");
+    grid.innerHTML = "";
+    if (recipes.length === 0) {
+        grid.innerHTML += `
+            <div style="
+                grid-column: span 3;
+                text-align: center;
+                font-size: 22px;
+                color: #2a4b6f;
+                opacity: 0.7;
+                margin-top: 40px;
+            ">
+                No recipes found by your criteria...:(
+            </div>
+        `;
+        return;
+    }
+
+    recipes.forEach(r => {
+        const tile = document.createElement("div");
+        tile.classList.add("tile");
+
+        tile.onclick = () => openView(
+            r.img,
+            r.Dish,
+            r.Ingredients,
+            r.Instructions,
+            r.Description,
+            r._id
+        );
+
+        tile.innerHTML = `
+            <img src="${r.img}" />
+            <div class="tile-overlay">
+                <div style="font-size: 20px; font-weight: bold;">${r.Dish}</div>
+                <div style="opacity: 0.9; font-size: 15px;">${r.Description || "No description"}</div>
+            </div>
+        `;
+
+        grid.appendChild(tile);
+    });
+}
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            searchByIngredients();
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>
