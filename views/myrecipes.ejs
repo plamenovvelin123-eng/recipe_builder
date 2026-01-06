@@ -197,7 +197,7 @@ body {
     opacity: 1;
 }
 
-/* ========================= RECIPE MODALS (Add/Edit/View) ========================= */
+
 .modal {
     position: fixed;
     inset: 0;
@@ -357,7 +357,6 @@ body {
     background: #2a4b6f;
 }
 
-/* ========================= EDIT + DELETE BUTTONS ========================= */
 .view-buttons {
     display: flex;
     justify-content: center;
@@ -397,7 +396,7 @@ body {
     box-shadow: 0 8px 25px rgba(179, 58, 58, 0.45);
 }
 
-/* Recipe Form Styles */
+
 .modal-content form {
     display: flex;
     flex-direction: column;
@@ -844,19 +843,19 @@ body {
 
         <form action="/recipes" method="POST" enctype="multipart/form-data">
 
-            <label>Dish:</label>
+            <label>Dish*:</label>
             <input type="text" name="Dish" required>
 
-            <label>Ingredients:</label>
+            <label>Ingredients*:</label>
             <input type="text" name="Ingredients" required>
 
-            <label>Instructions:</label>
+            <label>Instructions*:</label>
             <textarea name="Instructions" required></textarea>
 
             <label>Description:</label>
             <textarea name="Description"></textarea>
 
-            <label>Image:</label>
+            <label>Image*:</label>
             <input type="file" name="img">
 
             <div style="display: flex; gap: 10px;">

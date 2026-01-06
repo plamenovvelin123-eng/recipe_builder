@@ -90,8 +90,6 @@ apiRouter.get("/", async (req, res) => {
 });
 
 
-
-// FAVOURITES
 apiRouter.post('/favorites/:mealId', async (req, res) =>{
     const userId = req.session.userId
     if (userId == null){

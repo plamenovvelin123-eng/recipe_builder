@@ -14,7 +14,6 @@ body {
     background-size: cover;
 }
 
-/* ===== HEADER ===== */
 .header {
     position: fixed;
     top: 0;
@@ -182,7 +181,6 @@ body {
     text-align: center;
     font-weight: bold;
 }
-/* ========================= ACCOUNT MODAL ONLY ========================= */
 .account-modal {
     position: fixed;
     inset: 0;
@@ -372,7 +370,7 @@ body {
     border-top: 1px solid rgba(42, 75, 111, 0.15);
 }
 
-/* Responsive for account modal only */
+
 @media (max-width: 480px) {
     .account-modal-content {
         width: 95%;
@@ -387,7 +385,7 @@ body {
     }
 }
 .loader {
-  border: 16px solid #f3f3f3; /* Light grey */
+  border: 16px solid #f3f3f3; 
   border-top: 16px solid #DDCFB7; 
   border-radius: 50%;
   width: 120px;
@@ -400,7 +398,7 @@ body {
 
   animation: spin 2s linear infinite;
   z-index: 1000;
-  display: none; /* hidden at start */
+  display: none;
 }
 
 @keyframes spin {
@@ -421,7 +419,6 @@ body {
         <button class="header-btn" onclick="logout()">Log Out</button>
     </div>
 </div>
-    <!-- ACCOUNT SETTINGS MODAL (UPDATED) -->
 <div id="accountModal" class="account-modal">
     <div class="account-modal-content">
         <div class="account-modal-header">
@@ -430,7 +427,6 @@ body {
         </div>
         
         <div class="account-modal-body">
-            <!-- Username Change Section -->
             <div class="account-section">
                 <h3><span>👤</span> Change Username</h3>
                 <div class="account-input-group">
@@ -535,17 +531,14 @@ body {
 </div>
 
 
-<!-- MAIN CONTENT -->
 <div class="main">
 <div class="h1">Browse for the perfect ingredients for your recipes</div>
-    <!-- SEARCH BAR -->
     <div class="search-bar">
         <input id="searchInput" class="search-input" placeholder="Find your ingredients...">
         <button onclick="search()" class="header-btn">Search</button>
     </div>
     <div id="loader" class="loader" style="display:none; margin: 0 auto;"></div>
 
-    <!-- RESULTS -->
     <div id="resultsGrid" class="results-grid"></div>
 </div>
 
@@ -554,7 +547,7 @@ async function search() {
     const product = document.getElementById("searchInput").value.trim();
     if (!product) return;
 
-    document.getElementById("loader").style.display = "block"; // SHOW LOADER
+    document.getElementById("loader").style.display = "block";
 
     try {
         const res = await fetch(`/api/browse/${product}`);
@@ -563,7 +556,7 @@ async function search() {
     } catch (err) {
         alert("Error fetching results");
     } finally {
-        document.getElementById("loader").style.display = "none"; // HIDE LOADER
+        document.getElementById("loader").style.display = "none";
     }
 }
 

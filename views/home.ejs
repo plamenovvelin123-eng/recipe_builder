@@ -111,7 +111,7 @@ body {
     transform: translateX(0);
 }
 
-/* ========================= MAIN CONTENT ========================= */
+
 .main-content {
     margin-left: 60px;
     padding: 90px 30px 30px;
@@ -132,7 +132,6 @@ body {
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-/* ========================= MEAL CONTAINER ========================= */
 .meals-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -224,7 +223,6 @@ body {
     background: rgba(42,75,111,0.25);
 }
 
-/* ========================= ENHANCED MODAL ========================= */
 .modal {
     display: none;
     position: fixed;
@@ -269,11 +267,11 @@ body {
 }
 
 .modal-header {
-    background: white; /* Changed from blue gradient to white */
-    color: #2a4b6f; /* Changed text color to match your theme */
+    background: white; 
+    color: #2a4b6f; 
     padding: 20px 30px;
     position: relative;
-    border-bottom: 1px solid rgba(42, 75, 111, 0.1); /* Added subtle border */
+    border-bottom: 1px solid rgba(42, 75, 111, 0.1); 
 }
 
 .close {
@@ -289,7 +287,7 @@ body {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    color: #2a4b6f; /* Changed color to match theme */
+    color: #2a4b6f; 
 }
 
 .close:hover {
@@ -401,28 +399,25 @@ body {
         grid-template-columns: 1fr;
     }
 }
-/* ========================= ACCOUNT SETTINGS STYLES ========================= */
-/* ========================= ACCOUNT SETTINGS — OPTIMIZED ========================= */
 
 #accountModal .modal-content {
-    max-width: 430px !important;      /* по-компактно от 500px */
+    max-width: 430px !important;      
     border-radius: 16px;
     overflow: hidden;
 }
 
 #accountModal .modal-body {
-    padding: 22px !important;         /* беше 30px */
+    padding: 22px !important;       
     flex-direction: column;
 }
 
-/* Секции */
 .settings-section {
-    margin-bottom: 22px;              /* беше 30px */
+    margin-bottom: 22px;              
 }
 
 .settings-section h3 {
     color: #2a4b6f;
-    margin-bottom: 12px;              /* беше 20px */
+    margin-bottom: 12px;              
     font-size: 18px;
     font-weight: 700;
     display: flex;
@@ -430,25 +425,24 @@ body {
     gap: 10px;
 }
 
-/* Input групи */
+
 .input-group {
-    margin-bottom: 14px;              /* беше 20px */
+    margin-bottom: 14px;              
 }
 
 .input-group label {
     display: block;
-    margin-bottom: 5px;               /* беше 8px */
+    margin-bottom: 5px;               
     font-weight: 600;
     font-size: 13px;                  
     color: #2a4b6f;
 }
 
-/* Input полета */
 .settings-input {
     width: 100%;
-    padding: 10px 12px;               /* беше 12px 15px */
+    padding: 10px 12px;               
     border: 1px solid #b8c7dd;
-    border-radius: 8px;               /* беше 10px */
+    border-radius: 8px;              
     font-size: 14px;
     color: #2a4b6f;
     background: rgba(255, 255, 255, 0.9);
@@ -464,16 +458,16 @@ body {
 
 .hint {
     display: block;
-    margin-top: 3px;                  /* беше 5px */
+    margin-top: 3px;                  
     font-size: 11px;
     color: #666;
 }
 
-/* Бутоните */
+
 .settings-btn {
     width: 100%;
-    padding: 10px 20px;               /* беше 12px 25px */
-    border-radius: 8px;               /* беше 10px */
+    padding: 10px 20px;               
+    border-radius: 8px;               
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
@@ -534,7 +528,6 @@ body {
     to { transform: rotate(360deg); }
 }
 
-/* Делищата линия */
 #accountModal hr {
     margin: 22px 0;
     border: none;
@@ -555,7 +548,7 @@ body {
         <button class="header-btn" onclick="logout()">Log Out</button>
     </div>
 </div>
-<!-- Account Settings Modal -->
+
 <div id="accountModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
         <div class="modal-header">
@@ -564,7 +557,7 @@ body {
         </div>
         
         <div class="modal-body" style="flex-direction: column; padding: 30px;">
-            <!-- Username Change Section -->
+            
             <div class="settings-section">
                 <h3 style="color: #2a4b6f; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                     <span>👤</span> Change Username
@@ -754,7 +747,6 @@ async function loadMeals() {
     }
 }
 
-// Toggle favourite
 function toggleFav(btn) {
     const idMeal = btn.getAttribute("data-meal-id");
 
@@ -778,9 +770,6 @@ function toggleFav(btn) {
     }
 }
 
-
-
-// Extract ingredients from meal object
 function extractIngredients(meal) {
     const ingredients = [];
     for (let i = 1; i <= 20; i++) {
@@ -794,7 +783,6 @@ function extractIngredients(meal) {
     return ingredients;
 }
 
-// Open enhanced modal
 function openModal(meal) {
     document.getElementById("modalImage").src = meal.strMealThumb;
     document.getElementById("modalTitle").textContent = meal.strMeal;
@@ -804,8 +792,7 @@ function openModal(meal) {
 
     const ingContainer = document.getElementById("modalIngredients");
     ingContainer.innerHTML = "";
-    
-    // Extract ingredients from the meal object
+
     const ingredients = extractIngredients(meal);
     
     if (ingredients.length > 0) {
@@ -820,15 +807,13 @@ function openModal(meal) {
     }
 
     document.getElementById("mealModal").style.display = "block";
-    
-    // Close modal when clicking outside
+
     document.getElementById("mealModal").onclick = function(e) {
         if (e.target === this) {
             closeModal();
         }
     };
-    
-    // Close modal with Escape key
+ 
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeModal();
@@ -836,7 +821,6 @@ function openModal(meal) {
     });
 }
 
-// Close modal
 function closeModal() {
     document.getElementById("mealModal").style.display = "none";
 }
